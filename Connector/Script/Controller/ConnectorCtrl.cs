@@ -4,15 +4,11 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+
 namespace Connector
 {
-    [Serializable]
-    public class GameObjectEvent : UnityEvent<GameObject> { }
-
-    /// <summary>
-    /// 负责元素拾起，连接，高亮等功能的组合
-    /// </summary>
-    public class ConnectorBehaivor : MonoBehaviour
+    [System.Serializable]
+    public class ConnectorCtrl
     {
         [Range(0.1f, 1f)]
         public float nodeUpdateSpanTime = 0.5f;
@@ -25,15 +21,20 @@ namespace Connector
         [Range(3, 15)]
         public float distence = 1f;
 
+        public Dictionary<INodeParent, List<INodeItem>> ConnectedDic { get { return nodeConnectCtrl.ConnectedDic; } }
+
         public GameObjectEvent onConnect;
+        public GameObjectEvent onDisConnect;
         public GameObjectEvent onPickDown;
+        public GameObjectEvent onPickStatu;
         public GameObjectEvent onPickUp;
         public GameObjectEvent onMatch;
         public GameObjectEvent onDisMatch;
 
         private IPickUpController pickCtrl;
         private INodeConnectController nodeConnectCtrl;
-        void Start()
+
+        public void Start()
         {
             pickCtrl = new PickUpController(pickUpSpantime, distence, scrollSpeed);
             nodeConnectCtrl = new NodeConnectController(sphereRange, nodeUpdateSpanTime);
@@ -41,29 +42,25 @@ namespace Connector
             pickCtrl.onPickDown += OnPickDown;
             pickCtrl.onPickStatu += OnPickStatu;
             nodeConnectCtrl.onDisMatch += OnDisMath;
-            nodeConnectCtrl.onMatch += OnDisMath;
+            nodeConnectCtrl.onMatch += OnMatch;
+            nodeConnectCtrl.onConnected += OnConnected;
+            nodeConnectCtrl.onDisconnected += OnDisConnected;
         }
 
-        void Update()
+        public void Update()
         {
             if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
-            pickCtrl.Update();
-            nodeConnectCtrl.Update();
+            if (pickCtrl != null) pickCtrl.Update();
+            if (nodeConnectCtrl != null) nodeConnectCtrl.Update();
         }
 
-        void OnMatch(INodeItem[] items)
+        void OnMatch(INodeItem item)
         {
-            for (int i = 0; i < items.Length; i++)
-            {
-                onMatch.Invoke(items[i].Render);
-            }
+            onMatch.Invoke(item.Render);
         }
-        void OnDisMath(INodeItem[] items)
+        void OnDisMath(INodeItem item)
         {
-            for (int i = 0; i < items.Length; i++)
-            {
-                onDisMatch.Invoke(items[i].Render);
-            }
+            onDisMatch.Invoke(item.Render);
         }
         void OnPickUp(GameObject obj)
         {
@@ -78,16 +75,22 @@ namespace Connector
         }
         void OnConnected(INodeItem[] nodes)
         {
-            foreach (var item in nodes){
+            foreach (var item in nodes)
+            {
                 onConnect.Invoke(item.Render);
+            }
+        }
+        void OnDisConnected(INodeItem[] nodes)
+        {
+            foreach (var item in nodes)
+            {
+                onDisConnect.Invoke(item.Render);
             }
         }
         void OnPickStatu(GameObject go)
         {
             nodeConnectCtrl.TryConnect();
+            onPickStatu.Invoke(go);
         }
-
-    
-        
     }
 }

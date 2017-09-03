@@ -9,9 +9,10 @@ namespace Connector
     public class NodeConnectController : INodeConnectController
     {
         public event UnityAction<INodeItem[]> onConnected;
-        public event UnityAction<INodeItem[]> onMatch;
-        public event UnityAction<INodeItem[]> onDisMatch;
+        public event UnityAction<INodeItem> onMatch;
+        public event UnityAction<INodeItem> onDisMatch;
         public event UnityAction<INodeItem[]> onDisconnected;
+        public Dictionary<INodeParent, List<INodeItem>> ConnectedDic { get { return connectedNodes; } }
 
         private float timeSpan;
         private float spanTime;
@@ -20,7 +21,6 @@ namespace Connector
         private INodeItem activeNode;
         private INodeItem targetNode;
         private Dictionary<INodeParent, List<INodeItem>> connectedNodes = new Dictionary<INodeParent, List<INodeItem>>();
-
         public NodeConnectController(float sphereRange, float spanTime)
         {
             this.spanTime = spanTime;
@@ -35,15 +35,16 @@ namespace Connector
                 timeSpan = 0f;
                 if (targetNode != null)
                 {
-                    onDisMatch.Invoke(new INodeItem[] { targetNode });
+                    onDisMatch.Invoke(targetNode);
                 }
                 if (activeNode != null)
                 {
-                    onDisMatch.Invoke(new INodeItem[] { activeNode });
+                    onDisMatch.Invoke(activeNode);
                 }
                 if (FindConnectableObject())
                 {
-                    onMatch.Invoke(new INodeItem[] { activeNode, targetNode });
+                    onDisMatch.Invoke(activeNode);
+                    onDisMatch.Invoke(targetNode);
                 }
             }
         }
