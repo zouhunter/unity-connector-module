@@ -33,18 +33,19 @@ namespace Connector
             if (pickedUpItem != null && timeSpan > spanTime)
             {
                 timeSpan = 0f;
-                if (targetNode != null)
+               
+                if (!FindConnectableObject())
                 {
-                    onDisMatch.Invoke(targetNode);
-                }
-                if (activeNode != null)
-                {
-                    onDisMatch.Invoke(activeNode);
-                }
-                if (FindConnectableObject())
-                {
-                    onDisMatch.Invoke(activeNode);
-                    onDisMatch.Invoke(targetNode);
+                    if (targetNode != null)
+                    {
+                        onDisMatch.Invoke(targetNode);
+                    }
+                    if (activeNode != null)
+                    {
+                        onDisMatch.Invoke(activeNode);
+                    }
+                    activeNode = null;
+                    targetNode = null;
                 }
             }
         }
@@ -60,12 +61,15 @@ namespace Connector
                     {
                         activeNode = item;
                         targetNode = tempNode;
+                        if (onMatch != null) {
+                            onMatch(activeNode);
+                            onMatch(targetNode);
+                        }
                         return true;
                     }
                 }
             }
-            activeNode = null;
-            targetNode = null;
+         
             return false;
         }
 
@@ -77,6 +81,11 @@ namespace Connector
                 foreach (var collider in colliders)
                 {
                     IPortItem tempNode = collider.GetComponent<IPortItem>();
+                    if (tempNode == null)
+                    {
+                        //Debug.Log(collider + " have no iportItem");
+                        continue;
+                    }
                     //主被动动连接点，非自身点，相同名，没有建立连接
                     if (tempNode.Body != item.Body && tempNode.ConnectedNode == null)
                     {
@@ -150,6 +159,8 @@ namespace Connector
                     connectedNodes[targetNode.Body].Add(targetNode);
 
                     if (onConnected != null) onConnected.Invoke(new IPortItem[] { activeNode, targetNode });
+                    activeNode = null;
+                    targetNode = null;
                 }
             }
         }

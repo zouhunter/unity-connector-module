@@ -56,11 +56,13 @@ namespace Connector
 
         void OnMatch(IPortItem item)
         {
-            onMatch.Invoke(item.Render);
+            item.Render.enabled = true;
+            onMatch.Invoke(item.Render.gameObject);
         }
         void OnDisMath(IPortItem item)
         {
-            onDisMatch.Invoke(item.Render);
+            item.Render.enabled = false;
+            onDisMatch.Invoke(item.Render.gameObject);
         }
         void OnPickUp(GameObject obj)
         {
@@ -77,14 +79,14 @@ namespace Connector
         {
             foreach (var item in nodes)
             {
-                onConnect.Invoke(item.Render);
+                onConnect.Invoke(item.Render.gameObject);
             }
         }
         void OnDisConnected(IPortItem[] nodes)
         {
             foreach (var item in nodes)
             {
-                onDisConnect.Invoke(item.Render);
+                onDisConnect.Invoke(item.Render.gameObject);
             }
         }
         void OnPickStatu(GameObject go)
