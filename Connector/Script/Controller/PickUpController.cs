@@ -115,9 +115,7 @@ namespace Connector
                     }
                 }
             }
-            distence += Input.GetAxis("Mouse ScrollWheel") * scrollSpeed * Time.deltaTime;
-
-            //pickedUpObj.Rotation = pickedUpObj.Rotation * Quaternion.Euler(Vector3.up * Input.GetAxis("Mouse ScrollWheel") * scrollSpeed);
+            pickedUpObj.Rotation = pickedUpObj.Rotation * Quaternion.Euler(Vector3.up * Input.GetAxis("Mouse ScrollWheel") * scrollSpeed);
         }
         
     }
